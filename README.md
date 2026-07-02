@@ -1,0 +1,182 @@
+# krizziaci — Custom CI/CD Tool + O Aisthetikos Demo App
+
+Master of IT, Software Quality Assurance — class assignment.
+Repo: https://github.com/kvalenzuela1/SQAweb
+
+This repo has two parts:
+
+- **[`krizziaci/`](krizziaci/)** — a small, dependency-light CI/CD tool written
+  in Node.js.
+- **Everything else at the repo root** — **O Aisthetikos**, a small Express
+  web app for an aesthetics clinic (doctor-assigned appointments, a services
+  catalog, and invoice generation, with Jest tests) used as the project that
+  `krizziaci` builds and tests.
+
+`krizziaci` is a generic tool — it doesn't know anything about Express, Jest,
+or aesthetics clinics. It only knows how to read `krizziaci.yml` at a repo's
+root and run the steps it lists, which is why it's nested as a plain
+subfolder here rather than wired into the app's own code.
+
+## Architecture
+
+### 1. Trigger
+
+`krizziaci` supports two ways to detect new work, both implemented in
+[`krizziaci/bin/krizziaci.js`](krizziaci/bin/krizziaci.js):
+
+- **Git hook (used in this demo):** `krizziaci install-hook --repo <path>` writes
+  a `post-commit` hook into `<repo>/.git/hooks/post-commit`. Every time a commit
+  is made in that repo, git invokes the hook, which runs
+  `node krizziaci.js run --repo <path>` for the new `HEAD` commit. This is how
+  this repo is wired up locally (git hooks live in `.git/hooks/`, which git
+  never syncs to a remote — see "One-time setup" below to reinstall it after
+  cloning).
+- **Polling:** `krizziaci watch --repo <path> --interval <ms>` polls
+  `git rev-parse HEAD` on an interval and triggers a run whenever the commit hash
+  changes since the last observed run (persisted in `.krizziaci/last-commit.txt`).
+  Useful for a bare/remote repo where you can't install a local hook.
+
+### 2. Execute
+
+`krizziaci run` does the following:
+
+1. Resolves the target repo (`--repo`, default `.`) and reads the pipeline file
+   (`--file`, default `krizziaci.yml`) from the repo root.
+2. Parses the YAML with `js-yaml` (the tool's only dependency) into an ordered
+   list of `{ name, run }` steps.
+3. Runs each step's `run` command as a child process
+   (`child_process.spawn(..., { shell: true })`), streaming stdout/stderr live to
+   the console (prefixed with the step name) and to a run-specific log file.
+4. **Fails fast:** the moment a step exits with a non-zero code, remaining steps
+   are skipped and the run is marked `FAILED (step: <name>)`.
+
+### 3. Report
+
+Each run produces three things, stored under `.krizziaci/` at the repo root:
+
+- **A timestamped log file** per run at
+  `.krizziaci/logs/run-<n>-<shortsha>-<timestamp>.log`, containing the full
+  command output of every step that ran. These are committed to this repo so
+  the FAILED run's actual Jest failure output is visible on GitHub, not just
+  described.
+- **A console summary**: `▶ krizziaci run #N commit <sha> "<message>"` followed
+  by a bold `✔ PASSED` / `✘ FAILED (step: X)` line with total duration and the
+  log file path.
+- **A build history** at `.krizziaci/history.json` — one JSON record per run
+  (`run`, `commit`, `message`, `result`, `failedStep`, `durationMs`,
+  `timestamp`, `log`). View it with `krizziaci history --repo <path>` for a
+  formatted table.
+
+### Why a single small dependency (`js-yaml`)?
+
+Everything else (argument parsing, process spawning, logging, history) is
+hand-rolled in ~250 lines of plain Node.js — no CI framework, no test runner
+wrapper, no build system. `js-yaml` is the one exception, used only to parse
+`krizziaci.yml`; it has no transitive dependencies of its own.
+
+## Repo layout
+
+```
+krizziaci/
+  bin/krizziaci.js        # the whole tool: run / watch / install-hook / history
+  package.json            # single dependency: js-yaml
+
+server.js                 # Express app: services / doctors / appointments / invoices routes
+lib/serviceCatalog.js     # static aesthetics service catalog (name, price, duration)
+lib/doctorCatalog.js      # static doctor roster
+lib/appointmentStore.js   # appointment booking store (per-doctor conflict detection)
+lib/invoiceStore.js       # turns a completed appointment into a numbered invoice
+lib/renderInvoice.js      # renders a printable, XSS-safe invoice HTML page
+public/                   # vanilla HTML/CSS/JS frontend (Appointments / Services / Invoices tabs)
+scripts/build.js          # "build" step: node --check syntax validation
+test/*.test.js            # Jest unit tests, one file per lib module (18 tests total)
+krizziaci.yml             # pipeline definition (install / build / test)
+.krizziaci/               # committed: logs/ + history.json (build evidence)
+```
+
+### The O Aisthetikos app
+
+Three tabs on one page (`http://localhost:3000` after `npm start`):
+
+- **Appointments** — book a client to a doctor and a service at a date/time.
+  `lib/appointmentStore.js` rejects a booking that would overlap an existing
+  appointment **for the same doctor, on the same date** (each service has a
+  fixed duration, e.g. HydraFacial = 60 min); a different doctor, or the same
+  doctor on a different date, can freely take the same slot.
+- **Services** — read-only catalog of aesthetics services (Botox, Dermal
+  Fillers, Chemical Peel, Laser Hair Removal, Microneedling, HydraFacial) with
+  price and duration, served from `lib/serviceCatalog.js`.
+- **Invoices** — clicking "Generate Invoice" on a booked appointment
+  (`lib/invoiceStore.js`) creates a sequentially-numbered invoice (`INV-0001`,
+  `INV-0002`, ...) and opens a printable invoice page at `/invoice/:id`
+  (`lib/renderInvoice.js`, with output HTML-escaped since client names are
+  free-text user input). An appointment can only be invoiced once.
+
+## Running the demo
+
+This repo's git history *is* the demo — three commits, each one a real,
+already-executed `krizziaci` run:
+
+1. **Initial commit** — O Aisthetikos with appointment booking (no conflict
+   detection yet), the services catalog, and invoice generation. →
+   **PASSED**.
+2. **Add appointment conflict detection** — introduces `overlaps()` in
+   `lib/appointmentStore.js` to stop a doctor being double-booked, but ships
+   with a deliberate bug: the check only compares doctor + time, and forgets
+   to also require the *date* to match, so the new test
+   `addAppointment allows the same time slot on a different date` fails. →
+   **FAILED (step: test)**.
+3. **Fix conflict detection** — adds the missing `a.date !== b.date` check
+   back to `overlaps()`. → **PASSED**.
+
+Run these to see it directly:
+
+```sh
+git log --oneline                        # the 3 commits above
+node krizziaci/bin/krizziaci.js history --repo .   # PASSED / FAILED / PASSED table
+cat .krizziaci/logs/run-2-*.log          # the actual Jest failure output from the FAILED run
+```
+
+### One-time setup (after cloning)
+
+```sh
+git clone https://github.com/kvalenzuela1/SQAweb.git
+cd SQAweb
+npm install                              # installs express + jest for the app
+cd krizziaci && npm install && cd ..     # installs js-yaml for the CI tool
+node krizziaci/bin/krizziaci.js install-hook --repo .
+```
+
+`install-hook` writes `.git/hooks/post-commit` — git hooks are never part of
+the committed history, so this has to be run once per clone.
+
+### Reproducing the cycle live (for the in-class demo)
+
+To re-run the same PASSED → FAILED → PASSED arc live in front of the class
+instead of just showing the existing history:
+
+```sh
+# 1. PASSED — any trivial commit
+echo "// demo change" >> server.js
+git add -A && git commit -m "Demo: trivial change"
+
+# 2. FAILED — reintroduce the bug in lib/appointmentStore.js's overlaps():
+#      if (a.doctorId !== b.doctorId) return false;   // date check dropped
+git add -A && git commit -m "Demo: reintroduce the date-check bug"
+
+# 3. PASSED — restore the date check:
+#      if (a.date !== b.date || a.doctorId !== b.doctorId) return false;
+git add -A && git commit -m "Demo: fix the date-check bug"
+
+# then:
+node krizziaci/bin/krizziaci.js history --repo .
+```
+
+## CLI reference
+
+```
+krizziaci run          --repo <path> [--file krizziaci.yml]   # run the pipeline once
+krizziaci watch        --repo <path> [--interval 3000]        # poll for new commits
+krizziaci install-hook --repo <path>                          # write .git/hooks/post-commit
+krizziaci history      --repo <path> [-n <count>]              # print build history table
+```

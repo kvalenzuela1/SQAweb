@@ -1,0 +1,13 @@
+{
+  "name": "krizziaci",
+  "version": "1.0.0",
+  "description": "A tiny, dependency-light CI/CD tool: watches a git repo for new commits and runs a YAML-defined pipeline.",
+  "bin": {
+    "krizziaci": "bin/krizziaci.js"
+  },
+  "main": "bin/krizziaci.js",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

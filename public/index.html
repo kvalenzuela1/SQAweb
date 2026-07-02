@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>O Aisthetikos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>O Aisthetikos</h1>
+    <p class="tagline">Aesthetics &amp; Skin Clinic</p>
+    <nav>
+      <button class="tab-btn active" data-tab="appointments">Appointments</button>
+      <button class="tab-btn" data-tab="services">Services</button>
+      <button class="tab-btn" data-tab="invoices">Invoices</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="tab-appointments" class="tab active">
+      <h2>Book an Appointment</h2>
+      <form id="appointment-form">
+        <input id="appt-client" type="text" placeholder="Client name" autocomplete="off" required />
+        <select id="appt-doctor"></select>
+        <select id="appt-service"></select>
+        <input id="appt-date" type="date" required />
+        <input id="appt-time" type="time" required />
+        <button type="submit">Book</button>
+      </form>
+      <p id="appointment-error" class="error"></p>
+      <ul id="appointment-list"></ul>
+    </section>
+
+    <section id="tab-services" class="tab">
+      <h2>Our Services</h2>
+      <ul id="service-list" class="service-list"></ul>
+    </section>
+
+    <section id="tab-invoices" class="tab">
+      <h2>Invoices</h2>
+      <ul id="invoice-list"></ul>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
