@@ -20,5 +20,16 @@
     "durationMs": 1496,
     "timestamp": "2026-07-02T06:09:43.050Z",
     "log": ".krizziaci/logs/run-2-e072e0f-2026-07-02T06-09-43-050Z.log"
+  },
+  {
+    "run": 3,
+    "commit": "a3c5d997f6e8dd586e79967311e79fb97959f4e6",
+    "commitShort": "a3c5d99",
+    "message": "Fix conflict detection: scope overlap check to the same date",
+    "result": "PASSED",
+    "failedStep": null,
+    "durationMs": 1391,
+    "timestamp": "2026-07-02T06:09:59.993Z",
+    "log": ".krizziaci/logs/run-3-a3c5d99-2026-07-02T06-09-59-993Z.log"
   }
 ]
