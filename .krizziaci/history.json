@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "run": 1,
+    "commit": "1afc936a758f60c086ca9ce82d0daacd2e7de28b",
+    "commitShort": "1afc936",
+    "message": "Initial commit: O Aisthetikos aesthetics clinic app with krizziaci CI/CD pipeline",
+    "result": "PASSED",
+    "failedStep": null,
+    "durationMs": 1611,
+    "timestamp": "2026-07-02T06:09:18.506Z",
+    "log": ".krizziaci/logs/run-1-1afc936-2026-07-02T06-09-18-506Z.log"
+  }
+]

@@ -47,3 +47,17 @@ test('cancelAppointment removes the correct appointment', () => {
   expect(remaining).toHaveLength(1);
   expect(remaining[0].id).toBe(a.id);
 });
+
+test('addAppointment rejects an overlapping time slot for the same doctor', () => {
+  appointments.addAppointment({ clientName: 'A', doctorId: 'dr-cruz', serviceId: 'botox', date: '2026-07-10', time: '10:00' });
+  expect(() =>
+    appointments.addAppointment({ clientName: 'B', doctorId: 'dr-cruz', serviceId: 'peel', date: '2026-07-10', time: '10:15' })
+  ).toThrow(/overlap/i);
+});
+
+test('addAppointment allows the same time slot on a different date', () => {
+  appointments.addAppointment({ clientName: 'Monday client', doctorId: 'dr-cruz', serviceId: 'botox', date: '2026-07-06', time: '09:00' });
+  expect(() =>
+    appointments.addAppointment({ clientName: 'Tuesday client', doctorId: 'dr-cruz', serviceId: 'botox', date: '2026-07-07', time: '09:00' })
+  ).not.toThrow();
+});
