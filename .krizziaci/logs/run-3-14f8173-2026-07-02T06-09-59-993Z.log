@@ -1,5 +1,5 @@
 krizziaci run #3
-commit:  a3c5d997f6e8dd586e79967311e79fb97959f4e6
+commit:  14f817394e888efda0e93edbfbb9167bb957548a
 message: Fix conflict detection: scope overlap check to the same date
 started: 2026-07-02T06:09:59.993Z
 pipeline: todo-app
