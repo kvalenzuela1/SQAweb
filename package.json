@@ -1,7 +1,7 @@
 {
-  "name": "todo-app",
+  "name": "o-aisthetikos",
   "version": "1.0.0",
-  "description": "Simple Express to-do app used as the demo target for the krizziaci CI/CD tool.",
+  "description": "O Aisthetikos aesthetics clinic app: appointment booking, services catalog, and invoicing. Demo target for the krizziaci CI/CD tool.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
