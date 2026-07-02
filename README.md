@@ -180,3 +180,7 @@ krizziaci watch        --repo <path> [--interval 3000]        # poll for new com
 krizziaci install-hook --repo <path>                          # write .git/hooks/post-commit
 krizziaci history      --repo <path> [-n <count>]              # print build history table
 ```
+
+## License
+
+MIT.
