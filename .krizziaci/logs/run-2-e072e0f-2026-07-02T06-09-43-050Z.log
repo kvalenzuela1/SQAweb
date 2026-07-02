@@ -1,0 +1,71 @@
+krizziaci run #2
+commit:  e072e0fdbe64ee50df7f4987857bbe03b8895f5d
+message: Add appointment conflict detection
+started: 2026-07-02T06:09:43.050Z
+pipeline: todo-app
+
+$ npm install
+
+up to date, audited 337 packages in 646ms
+
+46 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+$ npm run build
+
+> todo-app@1.0.0 build
+> node scripts/build.js
+
+OK  server.js
+OK  lib/serviceCatalog.js
+OK  lib/doctorCatalog.js
+OK  lib/appointmentStore.js
+OK  lib/invoiceStore.js
+OK  lib/renderInvoice.js
+OK  public/app.js
+Build check passed.
+
+$ npm test
+
+> todo-app@1.0.0 test
+> jest
+
+PASS test/invoiceStore.test.js
+FAIL test/appointmentStore.test.js
+  ● addAppointment allows the same time slot on a different date
+
+    expect(received).not.toThrow()
+
+    Error name:    "Error"
+    Error message: "Dr. Elena Cruz already has an appointment that overlaps this time"
+
+          51 |   const candidate = { date, time, doctorId, durationMinutes: service.durationMinutes };
+          52 |   if (appointments.some((a) => overlaps(a, candidate))) {
+        > 53 |     throw new Error(`${doctor.name} already has an appointment that overlaps this time`);
+             |           ^
+          54 |   }
+          55 |
+          56 |   const appt = {
+
+      at Object.addAppointment (lib/appointmentStore.js:53:11)
+      at addAppointment (test/appointmentStore.test.js:61:18)
+      at Object.<anonymous> (node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (node_modules/expect/build/index.js:320:21)
+      at Object.toThrow (test/appointmentStore.test.js:62:9)
+      at Object.toThrow (test/appointmentStore.test.js:62:9)
+
+PASS test/renderInvoice.test.js
+PASS test/serviceCatalog.test.js
+PASS test/doctorCatalog.test.js
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 17 passed, 18 total
+Snapshots:   0 total
+Time:        0.21 s, estimated 1 s
+Ran all test suites.
+
+
+result: FAILED (step: test)
+duration: 1496ms

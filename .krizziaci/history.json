@@ -9,5 +9,16 @@
     "durationMs": 1611,
     "timestamp": "2026-07-02T06:09:18.506Z",
     "log": ".krizziaci/logs/run-1-1afc936-2026-07-02T06-09-18-506Z.log"
+  },
+  {
+    "run": 2,
+    "commit": "e072e0fdbe64ee50df7f4987857bbe03b8895f5d",
+    "commitShort": "e072e0f",
+    "message": "Add appointment conflict detection",
+    "result": "FAILED",
+    "failedStep": "test",
+    "durationMs": 1496,
+    "timestamp": "2026-07-02T06:09:43.050Z",
+    "log": ".krizziaci/logs/run-2-e072e0f-2026-07-02T06-09-43-050Z.log"
   }
 ]
