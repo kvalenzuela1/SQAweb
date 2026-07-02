@@ -17,6 +17,36 @@ or aesthetics clinics. It only knows how to read `krizziaci.yml` at a repo's
 root and run the steps it lists, which is why it's nested as a plain
 subfolder here rather than wired into the app's own code.
 
+## Tool choice
+
+This assignment's tool-selection rubric lists established CI/CD platforms
+(GitHub Actions, Jenkins, CircleCI, etc.) as the default options, with an
+explicit allowance to propose something else: *"students may propose another
+relevant automation or CI/CD tool, subject to instructor approval."*
+Building `krizziaci` from scratch was approved by the instructor under that
+allowance, rather than picking from the example list.
+
+**Why a custom tool fits this app specifically:** O Aisthetikos is a single
+small Node/Express service with no build step beyond a syntax check, no
+multi-service orchestration, and no need for cloud-hosted runners — the
+entire pipeline is three shell commands. A hosted platform like GitHub
+Actions or Jenkins would add YAML dialects, remote runners, and UI
+configuration to solve a problem that fits in ~230 lines of plain Node.js
+reacting to a git hook that's already on the machine. The trade-off is real
+(no hosted dashboard, no matrix builds, no marketplace of pre-built actions),
+but for an app this size the overhead outweighs the benefit — and building
+it from scratch is also what makes it possible to explain, line by line,
+what "trigger → execute → report" actually means underneath a tool like
+Actions or Jenkins.
+
+## How this satisfies the assignment rubric
+
+| Rubric pillar | What that means | Where it's satisfied |
+|---|---|---|
+| **Automation Tool Use** — "Explain and configure the selected tool for CI or quality automation." | krizziaci's trigger → execute → report design, documented below | [Architecture](#architecture), [`krizziaci/bin/krizziaci.js`](krizziaci/bin/krizziaci.js) |
+| **Quality Verification** — "Run automated checks that prove the application remains stable." | The `build` (syntax check) and `test` (18 Jest tests) steps run automatically on every commit | [`krizziaci.yml`](krizziaci.yml), [`scripts/build.js`](scripts/build.js), `test/*.test.js` |
+| **Feature Integration** — "Add new features and show that the pipeline validates the change." | The appointment conflict-detection feature: added with a real bug, caught by the pipeline (FAILED), then fixed and re-validated (PASSED) | [Running the demo](#running-the-demo), commits `452a019` → `14f8173` |
+
 ## Architecture
 
 ### 1. Trigger
@@ -181,6 +211,14 @@ krizziaci install-hook --repo <path>                          # write .git/hooks
 krizziaci history      --repo <path> [-n <count>]              # print build history table
 ```
 
+## Contributing
+
+`main` is protected: anyone other than the repo admin must open a pull
+request and get at least one approval before merging — direct pushes to
+`main` are blocked for everyone except the admin account. If a PR gets new
+commits after being approved, the approval is dismissed and it needs
+re-review, so what merges is always what was actually reviewed.
+
 ## License
 
-MIT.
+[MIT](LICENSE).

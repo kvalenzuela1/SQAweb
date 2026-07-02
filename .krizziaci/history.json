@@ -53,5 +53,16 @@
     "durationMs": 1469,
     "timestamp": "2026-07-02T06:24:29.418Z",
     "log": ".krizziaci/logs/run-5-52c5dfa-2026-07-02T06-24-29-418Z.log"
+  },
+  {
+    "run": 6,
+    "commit": "125fd9e4aa9f847c5554ad2ad6eb657c3427504b",
+    "commitShort": "125fd9e",
+    "message": "Rename package to o-aisthetikos to match the current app",
+    "result": "PASSED",
+    "failedStep": null,
+    "durationMs": 1327,
+    "timestamp": "2026-07-02T06:48:40.684Z",
+    "log": ".krizziaci/logs/run-6-125fd9e-2026-07-02T06-48-40-684Z.log"
   }
 ]
