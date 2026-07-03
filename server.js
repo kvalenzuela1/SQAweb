@@ -6,6 +6,7 @@ const services = require('./lib/serviceCatalog');
 const doctors = require('./lib/doctorCatalog');
 const appointments = require('./lib/appointmentStore');
 const invoices = require('./lib/invoiceStore');
+const patients = require('./lib/patientStore');
 const { renderInvoiceHtml } = require('./lib/renderInvoice');
 
 const app = express();
@@ -52,6 +53,25 @@ app.post('/api/invoices', (req, res) => {
     const status = /not found/i.test(err.message) ? 404 : 409;
     res.status(status).json({ error: err.message });
   }
+});
+
+app.get('/api/patients', (req, res) => {
+  res.json(patients.getPatients());
+});
+
+app.post('/api/patients', (req, res) => {
+  try {
+    const patient = patients.addPatient(req.body);
+    res.status(201).json(patient);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete('/api/patients/:id', (req, res) => {
+  const deleted = patients.deletePatient(Number(req.params.id));
+  if (!deleted) return res.status(404).json({ error: 'Patient not found' });
+  res.status(204).end();
 });
 
 app.get('/invoice/:id', (req, res) => {

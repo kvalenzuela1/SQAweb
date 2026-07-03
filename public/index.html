@@ -13,6 +13,7 @@
       <button class="tab-btn active" data-tab="appointments">Appointments</button>
       <button class="tab-btn" data-tab="services">Services</button>
       <button class="tab-btn" data-tab="invoices">Invoices</button>
+      <button class="tab-btn" data-tab="patients">Patients</button>
     </nav>
   </header>
 
@@ -22,7 +23,10 @@
       <form id="appointment-form">
         <input id="appt-client" type="text" placeholder="Client name" autocomplete="off" required />
         <select id="appt-doctor"></select>
-        <select id="appt-service"></select>
+        <details id="appt-services" class="services-dropdown">
+          <summary>Select services</summary>
+          <div id="appt-services-options"></div>
+        </details>
         <input id="appt-date" type="date" required />
         <input id="appt-time" type="time" required />
         <button type="submit">Book</button>
@@ -39,6 +43,39 @@
     <section id="tab-invoices" class="tab">
       <h2>Invoices</h2>
       <ul id="invoice-list"></ul>
+    </section>
+
+    <section id="tab-patients" class="tab">
+      <h2>Patient Information</h2>
+      <form id="patient-form">
+        <div class="field">
+          <label for="patient-name">Full name</label>
+          <input id="patient-name" type="text" placeholder="Full name" autocomplete="off" required />
+        </div>
+        <div class="field">
+          <label for="patient-phone">Phone number</label>
+          <input id="patient-phone" type="tel" placeholder="Phone number" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="patient-email">Email address</label>
+          <input id="patient-email" type="email" placeholder="Email address" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="patient-dob">Date of birth</label>
+          <input id="patient-dob" type="date" />
+        </div>
+        <div class="field field-wide">
+          <label for="patient-address">Address</label>
+          <input id="patient-address" type="text" placeholder="Address" autocomplete="off" />
+        </div>
+        <div class="field field-wide">
+          <label for="patient-notes">Medical notes / allergies</label>
+          <textarea id="patient-notes" placeholder="Medical notes / allergies"></textarea>
+        </div>
+        <button type="submit">Save Patient</button>
+      </form>
+      <p id="patient-error" class="error"></p>
+      <ul id="patient-list"></ul>
     </section>
   </main>
 
