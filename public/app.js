@@ -197,9 +197,122 @@ async function generateInvoice(appointmentId) {
   await Promise.all([loadAppointments(), loadInvoices()]);
   window.open(`/invoice/${invoice.id}`, '_blank');
 }
+const patientForm = document.getElementById('patient-form');
+const patientList = document.getElementById('patient-list');
+
+// ===============================
+// LOAD PATIENTS
+// ===============================
+async function loadPatients() {
+  const res = await fetch('/api/patients');
+  const patients = await res.json();
+  renderPatients(patients);
+}
+
+// ===============================
+// RENDER PATIENT LIST
+// ===============================
+function renderPatients(list) {
+  patientList.innerHTML = '';
+
+  list.forEach(p => {
+    const li = document.createElement('li');
+
+    const info = document.createElement('span');
+    info.innerHTML = `
+      <div><strong>${p.firstName} ${p.lastName}</strong></div>
+      <div class="meta">
+        DOB: ${p.dob} | Gender: ${p.gender || 'N/A'} | Contact: ${p.contact || 'N/A'} | ID: ${p.id}
+      </div>
+    `;
+
+    const actions = document.createElement('span');
+    actions.className = 'actions';
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete';
+    delBtn.textContent = 'Delete';
+
+    delBtn.addEventListener('click', async () => {
+      await fetch(`/api/patients/${p.id}`, {
+        method: 'DELETE'
+      });
+      loadPatients();
+    });
+
+    actions.appendChild(delBtn);
+
+    li.appendChild(info);
+    li.appendChild(actions);
+
+    patientList.appendChild(li);
+  });
+}
+
+// ===============================
+// SAVE PATIENT
+// ===============================
+patientForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const res = await fetch('/api/patients', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      firstName: document.getElementById('patient-firstname').value,
+      lastName: document.getElementById('patient-lastname').value,
+      dob: document.getElementById('patient-dob').value,
+      gender: document.getElementById('patient-gender').value,
+      contact: document.getElementById('patient-contact').value
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    alert(err.error);
+    return;
+  }
+
+  patientForm.reset();
+  document.getElementById('patient-age').value = '';
+
+  loadPatients();
+});
 
 // --- init ---
 loadServices();
 loadDoctors();
 loadAppointments();
 loadInvoices();
+loadPatients();
+
+// AUTO COMPUTE AGE// ===============================
+const dobInput = document.getElementById('patient-dob');
+const ageInput = document.getElementById('patient-age');
+
+if (dobInput && ageInput) {
+  dobInput.addEventListener('change', () => {
+    if (!dobInput.value) {
+      ageInput.value = '';
+      return;
+    }
+
+    const birthDate = new Date(dobInput.value);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    ageInput.value = age;
+  });
+}

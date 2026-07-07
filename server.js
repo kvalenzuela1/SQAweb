@@ -6,6 +6,7 @@ const services = require('./lib/serviceCatalog');
 const doctors = require('./lib/doctorCatalog');
 const appointments = require('./lib/appointmentStore');
 const invoices = require('./lib/invoiceStore');
+const patients = require('./lib/patientStore');
 const { renderInvoiceHtml } = require('./lib/renderInvoice');
 
 const app = express();
@@ -59,6 +60,36 @@ app.get('/invoice/:id', (req, res) => {
   if (!invoice) return res.status(404).send('Invoice not found');
   res.send(renderInvoiceHtml(invoice));
 });
+app.get('/api/patients', (req, res) => {
+  res.json(patients.getPatients());
+});
+
+app.post('/api/patients', (req, res) => {
+  try {
+    const patient = patients.addPatient(req.body);
+    res.status(201).json(patient);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get('/api/patients/:id', (req, res) => {
+  const patient = patients.findPatient(req.params.id);
+  if (!patient) return res.status(404).json({ error: 'Patient not found' });
+  res.json(patient);
+});
+
+app.delete('/api/patients/:id', (req, res) => {
+  const ok = patients.deletePatient(Number(req.params.id));
+  if (!ok) return res.status(404).json({ error: 'Patient not found' });
+  res.status(204).end();
+});
+
+app.post('/api/patients/reset', (req, res) => {
+  patients.reset();
+  res.status(204).end();
+});
+
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
