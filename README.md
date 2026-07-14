@@ -8,9 +8,9 @@ This repo has two parts:
 - **[`krizziaci/`](krizziaci/)** — a small, dependency-light CI/CD tool written
   in Node.js.
 - **Everything else at the repo root** — **O Aisthetikos**, a small Express
-  web app for an aesthetics clinic (doctor-assigned appointments, a services
-  catalog, and invoice generation, with Jest tests) used as the project that
-  `krizziaci` builds and tests.
+  web app for an aesthetics clinic (patient records, doctor-assigned
+  appointments, a services catalog, and invoice generation, with Jest tests)
+  used as the project that `krizziaci` builds and tests.
 
 `krizziaci` is a generic tool — it doesn't know anything about Express, Jest,
 or aesthetics clinics. It only knows how to read `krizziaci.yml` at a repo's
@@ -44,14 +44,15 @@ Actions or Jenkins.
 | Rubric pillar | What that means | Where it's satisfied |
 |---|---|---|
 | **Automation Tool Use** — "Explain and configure the selected tool for CI or quality automation." | krizziaci's trigger → execute → report design, documented below | [Architecture](#architecture), [`krizziaci/bin/krizziaci.js`](krizziaci/bin/krizziaci.js) |
-| **Quality Verification** — "Run automated checks that prove the application remains stable." | The `build` (syntax check) and `test` (18 Jest tests) steps run automatically on every commit | [`krizziaci.yml`](krizziaci.yml), [`scripts/build.js`](scripts/build.js), `test/*.test.js` |
-| **Feature Integration** — "Add new features and show that the pipeline validates the change." | The appointment conflict-detection feature: added with a real bug, caught by the pipeline (FAILED), then fixed and re-validated (PASSED) | [Running the demo](#running-the-demo), commits `452a019` → `14f8173` |
+| **Quality Verification** — "Run automated checks that prove the application remains stable." | The `build` (syntax check), `test` (27 Jest tests), and `quality` (thresholded coverage) steps run automatically on every push and pull request | [`krizziaci.yml`](krizziaci.yml), [`scripts/build.js`](scripts/build.js), `test/*.test.js`, [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
+| **Feature Integration** — "Add new features and show that the pipeline validates the change." | The appointment conflict-detection, patient-record, currency, and multi-service booking changes are covered by tests and recorded in the krizziaci build history | [Running the demo](#running-the-demo), [`.krizziaci/history.json`](.krizziaci/history.json) |
 
 ## Architecture
 
 ### 1. Trigger
 
-`krizziaci` supports two ways to detect new work, both implemented in
+`krizziaci` supports local detection, while the repository workflow provides
+push and pull-request execution. Both are implemented through
 [`krizziaci/bin/krizziaci.js`](krizziaci/bin/krizziaci.js):
 
 - **Git hook (used in this demo):** `krizziaci install-hook --repo <path>` writes
@@ -66,6 +67,10 @@ Actions or Jenkins.
   changes since the last observed run (persisted in `.krizziaci/last-commit.txt`).
   Useful for a bare/remote repo where you can't install a local hook.
 
+- **Repository workflow:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+  runs the same `krizziaci` pipeline on every push and pull request, producing
+  checks that can be reviewed before merge.
+
 ### 2. Execute
 
 `krizziaci run` does the following:
@@ -79,6 +84,10 @@ Actions or Jenkins.
    the console (prefixed with the step name) and to a run-specific log file.
 4. **Fails fast:** the moment a step exits with a non-zero code, remaining steps
    are skipped and the run is marked `FAILED (step: <name>)`.
+
+The pipeline's `quality` step runs Jest with coverage thresholds of 75% branches,
+80% functions, 90% lines, and 85% statements. A run fails if coverage drops
+below any threshold.
 
 ### 3. Report
 
@@ -111,22 +120,23 @@ krizziaci/
   bin/krizziaci.js        # the whole tool: run / watch / install-hook / history
   package.json            # single dependency: js-yaml
 
-server.js                 # Express app: services / doctors / appointments / invoices routes
+server.js                 # Express app: patients / services / doctors / appointments / invoices routes
 lib/serviceCatalog.js     # static aesthetics service catalog (name, price, duration)
 lib/doctorCatalog.js      # static doctor roster
 lib/appointmentStore.js   # appointment booking store (per-doctor conflict detection)
 lib/invoiceStore.js       # turns a completed appointment into a numbered invoice
 lib/renderInvoice.js      # renders a printable, XSS-safe invoice HTML page
-public/                   # vanilla HTML/CSS/JS frontend (Appointments / Services / Invoices tabs)
+public/                   # vanilla HTML/CSS/JS frontend (Appointments / Services / Invoices / Patients tabs)
 scripts/build.js          # "build" step: node --check syntax validation
-test/*.test.js            # Jest unit tests, one file per lib module (18 tests total)
-krizziaci.yml             # pipeline definition (install / build / test)
+test/*.test.js            # Jest unit tests, one file per lib module (27 tests total)
+krizziaci.yml             # pipeline definition (install / build / test / quality)
+.github/workflows/        # push and pull-request workflow that runs krizziaci
 .krizziaci/               # committed: logs/ + history.json (build evidence)
 ```
 
 ### The O Aisthetikos app
 
-Three tabs on one page (`http://localhost:3000` after `npm start`):
+Four tabs on one page (`http://localhost:3000` after `npm start`):
 
 - **Appointments** — book a client to a doctor and a service at a date/time.
   `lib/appointmentStore.js` rejects a booking that would overlap an existing
@@ -141,11 +151,13 @@ Three tabs on one page (`http://localhost:3000` after `npm start`):
   `INV-0002`, ...) and opens a printable invoice page at `/invoice/:id`
   (`lib/renderInvoice.js`, with output HTML-escaped since client names are
   free-text user input). An appointment can only be invoiced once.
+- **Patients** — create and remove patient records with contact information,
+  date of birth, address, and medical notes/allergies.
 
 ## Running the demo
 
-This repo's git history *is* the demo — three commits, each one a real,
-already-executed `krizziaci` run:
+This repo's git history and `.krizziaci/` records provide the automation evidence.
+Each feature commit has an associated pipeline run:
 
 1. **Initial commit** — O Aisthetikos with appointment booking (no conflict
    detection yet), the services catalog, and invoice generation. →
@@ -158,6 +170,9 @@ already-executed `krizziaci` run:
    **FAILED (step: test)**.
 3. **Fix conflict detection** — adds the missing `a.date !== b.date` check
    back to `overlaps()`. → **PASSED**.
+4. **Current feature integration** — restricts the doctor roster, switches
+   currency to PHP, adds patient records, and supports multi-service bookings.
+   The 27-test suite and coverage gate pass. → **PASSED**.
 
 Run these to see it directly:
 
@@ -172,8 +187,8 @@ cat .krizziaci/logs/run-2-*.log          # the actual Jest failure output from t
 ```sh
 git clone https://github.com/kvalenzuela1/SQAweb.git
 cd SQAweb
-npm install                              # installs express + jest for the app
-cd krizziaci && npm install && cd ..     # installs js-yaml for the CI tool
+npm ci                                     # installs express + jest for the app
+cd krizziaci && npm ci && cd ..            # installs js-yaml for the CI tool
 node krizziaci/bin/krizziaci.js install-hook --repo .
 ```
 

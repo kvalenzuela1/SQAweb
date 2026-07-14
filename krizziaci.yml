@@ -2,10 +2,13 @@ name: o-aisthetikos
 
 steps:
   - name: install
-    run: npm install
+    run: npm ci
 
   - name: build
     run: npm run build
 
   - name: test
     run: npm test
+
+  - name: quality
+    run: npm run quality
