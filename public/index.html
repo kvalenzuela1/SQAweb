@@ -21,7 +21,9 @@
     <section id="tab-appointments" class="tab active">
       <h2>Book an Appointment</h2>
       <form id="appointment-form">
-        <input id="appt-client" type="text" placeholder="Client name" autocomplete="off" required />
+        <select id="appt-patient" required>
+          <option value="">Select patient</option>
+        </select>
         <select id="appt-doctor"></select>
         <details id="appt-services" class="services-dropdown">
           <summary>Select services</summary>

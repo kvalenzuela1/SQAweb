@@ -12,7 +12,7 @@ h2 { font-size: 1.1rem; margin-bottom: 12px; }
 #appointment-form, #patient-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 #appointment-form input, #appointment-form select,
 #patient-form input, #patient-form textarea { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; font-family: inherit; }
-#appt-client, #appt-services { flex: 1 1 100%; }
+#appt-patient, #appt-services { flex: 1 1 100%; }
 .services-dropdown { position: relative; border: 1px solid #ccc; border-radius: 6px; }
 .services-dropdown summary { padding: 8px; font-size: 0.95rem; cursor: pointer; list-style: none; color: #2b2b2b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .services-dropdown summary::-webkit-details-marker { display: none; }
