@@ -5,7 +5,7 @@ const { renderInvoiceHtml } = require('../lib/renderInvoice');
 const sample = {
   invoiceNumber: 'INV-0001',
   clientName: 'Jane Doe',
-  doctorName: 'Dr. Elena Cruz',
+  doctorName: 'Dr. Rhodora Nieto',
   serviceName: 'Botox Injections',
   price: 250,
   date: '2026-07-10',

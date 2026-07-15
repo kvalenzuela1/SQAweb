@@ -13,7 +13,9 @@ tabButtons.forEach((btn) => {
 
 // --- services ---
 const serviceListEl = document.getElementById('service-list');
-const apptServiceEl = document.getElementById('appt-service');
+const apptServicesEl = document.getElementById('appt-services');
+const apptServicesSummaryEl = apptServicesEl.querySelector('summary');
+const apptServicesOptionsEl = document.getElementById('appt-services-options');
 
 async function loadServices() {
   const res = await fetch('/api/services');
@@ -30,7 +32,7 @@ function renderServiceList(services) {
     name.textContent = `${service.name} (${service.durationMinutes} min)`;
     const price = document.createElement('span');
     price.className = 'service-price';
-    price.textContent = `$${service.price.toFixed(2)}`;
+    price.textContent = `₱${service.price.toFixed(2)}`;
     li.appendChild(name);
     li.appendChild(price);
     serviceListEl.appendChild(li);
@@ -38,14 +40,39 @@ function renderServiceList(services) {
 }
 
 function renderServiceOptions(services) {
-  apptServiceEl.innerHTML = '';
+  apptServicesOptionsEl.innerHTML = '';
   for (const service of services) {
-    const opt = document.createElement('option');
-    opt.value = service.id;
-    opt.textContent = service.name;
-    apptServiceEl.appendChild(opt);
+    const label = document.createElement('label');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.name = 'appt-service';
+    checkbox.value = service.id;
+    checkbox.addEventListener('change', updateServicesSummary);
+    label.appendChild(checkbox);
+    label.append(` ${service.name} (₱${service.price.toFixed(2)})`);
+    apptServicesOptionsEl.appendChild(label);
+  }
+  updateServicesSummary();
+}
+
+function getSelectedServiceIds() {
+  return Array.from(apptServicesOptionsEl.querySelectorAll('input[name="appt-service"]:checked')).map((el) => el.value);
+}
+
+function updateServicesSummary() {
+  const checked = Array.from(apptServicesOptionsEl.querySelectorAll('input[name="appt-service"]:checked'));
+  apptServicesSummaryEl.textContent = checked.length
+    ? checked.map((el) => el.parentElement.textContent.trim()).join(', ')
+    : 'Select services';
+}
+
+function closeServicesDropdownIfOutside(target) {
+  if (apptServicesEl.open && !apptServicesEl.contains(target)) {
+    apptServicesEl.open = false;
   }
 }
+document.addEventListener('click', (e) => closeServicesDropdownIfOutside(e.target));
+document.addEventListener('focusin', (e) => closeServicesDropdownIfOutside(e.target));
 
 // --- doctors ---
 const apptDoctorEl = document.getElementById('appt-doctor');
@@ -87,7 +114,7 @@ function renderAppointments(appts) {
     title.textContent = `${appt.clientName} — ${appt.serviceName}`;
     const meta = document.createElement('div');
     meta.className = 'meta';
-    meta.textContent = `${appt.doctorName} · ${appt.date} at ${appt.time} · $${appt.price.toFixed(2)}`;
+    meta.textContent = `${appt.doctorName} · ${appt.date} at ${appt.time} · ₱${appt.price.toFixed(2)}`;
     info.appendChild(title);
     info.appendChild(meta);
 
@@ -132,7 +159,7 @@ apptFormEl.addEventListener('submit', async (e) => {
     body: JSON.stringify({
       clientName: apptClientEl.value,
       doctorId: apptDoctorEl.value,
-      serviceId: apptServiceEl.value,
+      serviceIds: getSelectedServiceIds(),
       date: apptDateEl.value,
       time: apptTimeEl.value,
     }),
@@ -145,6 +172,9 @@ apptFormEl.addEventListener('submit', async (e) => {
   apptClientEl.value = '';
   apptDateEl.value = '';
   apptTimeEl.value = '';
+  apptServicesOptionsEl.querySelectorAll('input[name="appt-service"]:checked').forEach((el) => (el.checked = false));
+  updateServicesSummary();
+  apptServicesEl.open = false;
   loadAppointments();
 });
 
@@ -168,7 +198,7 @@ function renderInvoices(invoiceList) {
     title.textContent = `${invoice.invoiceNumber} — ${invoice.clientName}`;
     const meta = document.createElement('div');
     meta.className = 'meta';
-    meta.textContent = `${invoice.serviceName} · ${invoice.doctorName} · $${invoice.price.toFixed(2)}`;
+    meta.textContent = `${invoice.serviceName} · ${invoice.doctorName} · ₱${invoice.price.toFixed(2)}`;
     info.appendChild(title);
     info.appendChild(meta);
 
@@ -197,87 +227,83 @@ async function generateInvoice(appointmentId) {
   await Promise.all([loadAppointments(), loadInvoices()]);
   window.open(`/invoice/${invoice.id}`, '_blank');
 }
-const patientForm = document.getElementById('patient-form');
-const patientList = document.getElementById('patient-list');
 
-// ===============================
-// LOAD PATIENTS
-// ===============================
+// --- patients ---
+const patientListEl = document.getElementById('patient-list');
+const patientFormEl = document.getElementById('patient-form');
+const patientNameEl = document.getElementById('patient-name');
+const patientPhoneEl = document.getElementById('patient-phone');
+const patientEmailEl = document.getElementById('patient-email');
+const patientDobEl = document.getElementById('patient-dob');
+const patientAddressEl = document.getElementById('patient-address');
+const patientNotesEl = document.getElementById('patient-notes');
+const patientErrorEl = document.getElementById('patient-error');
+
 async function loadPatients() {
   const res = await fetch('/api/patients');
   const patients = await res.json();
   renderPatients(patients);
 }
 
-// ===============================
-// RENDER PATIENT LIST
-// ===============================
-function renderPatients(list) {
-  patientList.innerHTML = '';
-
-  list.forEach(p => {
+function renderPatients(patients) {
+  patientListEl.innerHTML = '';
+  for (const patient of patients) {
     const li = document.createElement('li');
 
     const info = document.createElement('span');
-    info.innerHTML = `
-      <div><strong>${p.firstName} ${p.lastName}</strong></div>
-      <div class="meta">
-        DOB: ${p.dob} | Gender: ${p.gender || 'N/A'} | Contact: ${p.contact || 'N/A'} | ID: ${p.id}
-      </div>
-    `;
+    const title = document.createElement('div');
+    title.textContent = patient.fullName;
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = [patient.phone, patient.email, patient.dob, patient.address]
+      .filter(Boolean)
+      .join(' · ');
+    info.appendChild(title);
+    info.appendChild(meta);
+    if (patient.notes) {
+      const notes = document.createElement('div');
+      notes.className = 'meta';
+      notes.textContent = `Notes: ${patient.notes}`;
+      info.appendChild(notes);
+    }
 
-    const actions = document.createElement('span');
-    actions.className = 'actions';
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'delete';
-    delBtn.textContent = 'Delete';
-
-    delBtn.addEventListener('click', async () => {
-      await fetch(`/api/patients/${p.id}`, {
-        method: 'DELETE'
-      });
-      loadPatients();
-    });
-
-    actions.appendChild(delBtn);
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete';
+    deleteBtn.textContent = 'Remove';
+    deleteBtn.addEventListener('click', () => deletePatient(patient.id));
 
     li.appendChild(info);
-    li.appendChild(actions);
-
-    patientList.appendChild(li);
-  });
+    li.appendChild(deleteBtn);
+    patientListEl.appendChild(li);
+  }
 }
 
-// ===============================
-// SAVE PATIENT
-// ===============================
-patientForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
+async function deletePatient(id) {
+  await fetch(`/api/patients/${id}`, { method: 'DELETE' });
+  loadPatients();
+}
 
+patientFormEl.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  patientErrorEl.textContent = '';
   const res = await fetch('/api/patients', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      firstName: document.getElementById('patient-firstname').value,
-      lastName: document.getElementById('patient-lastname').value,
-      dob: document.getElementById('patient-dob').value,
-      gender: document.getElementById('patient-gender').value,
-      contact: document.getElementById('patient-contact').value
-    })
+      fullName: patientNameEl.value,
+      phone: patientPhoneEl.value,
+      email: patientEmailEl.value,
+      dob: patientDobEl.value,
+      address: patientAddressEl.value,
+      notes: patientNotesEl.value,
+    }),
   });
-
   if (!res.ok) {
-    const err = await res.json();
-    alert(err.error);
+    const { error } = await res.json();
+    patientErrorEl.textContent = error;
     return;
   }
-
-  patientForm.reset();
-  document.getElementById('patient-age').value = '';
-
+  patientFormEl.reset();
   loadPatients();
 });
 
@@ -287,32 +313,3 @@ loadDoctors();
 loadAppointments();
 loadInvoices();
 loadPatients();
-
-// AUTO COMPUTE AGE// ===============================
-const dobInput = document.getElementById('patient-dob');
-const ageInput = document.getElementById('patient-age');
-
-if (dobInput && ageInput) {
-  dobInput.addEventListener('change', () => {
-    if (!dobInput.value) {
-      ageInput.value = '';
-      return;
-    }
-
-    const birthDate = new Date(dobInput.value);
-    const today = new Date();
-
-    let age = today.getFullYear() - birthDate.getFullYear();
-
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-
-    ageInput.value = age;
-  });
-}

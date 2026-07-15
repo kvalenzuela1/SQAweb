@@ -6,51 +6,47 @@ beforeEach(() => {
   patients.reset();
 });
 
-test('getPatients returns empty array initially', () => {
+test('getPatients starts empty', () => {
   expect(patients.getPatients()).toEqual([]);
 });
 
-test('addPatient creates a valid patient', () => {
-  const p = patients.addPatient({
-    firstName: 'Jenny',
-    lastName: 'Cruz',
-    dob: '2004-05-12',
-    gender: 'Female',
-    contact: '09171234567'
+test('addPatient stores contact info, dob, address, and notes', () => {
+  const patient = patients.addPatient({
+    fullName: 'Jane Doe',
+    phone: '0917-000-0000',
+    email: 'jane@example.com',
+    dob: '1990-05-01',
+    address: '123 Rizal St., Manila',
+    notes: 'Allergic to lidocaine',
   });
-
-  expect(p).toMatchObject({
-    firstName: 'Jenny',
-    lastName: 'Cruz',
-    dob: '2004-05-12'
-  });
-});
-
-test('addPatient throws error on missing fields', () => {
-  expect(() =>
-    patients.addPatient({ firstName: '', lastName: '', dob: '' })
-  ).toThrow();
-});
-
-test('findPatient returns correct record', () => {
-  const p = patients.addPatient({
-    firstName: 'Test',
-    lastName: 'User',
-    dob: '2000-01-01'
-  });
-
-  expect(patients.findPatient(p.id)).toMatchObject({
-    firstName: 'Test'
+  expect(patient).toMatchObject({
+    fullName: 'Jane Doe',
+    phone: '0917-000-0000',
+    email: 'jane@example.com',
+    dob: '1990-05-01',
+    address: '123 Rizal St., Manila',
+    notes: 'Allergic to lidocaine',
   });
 });
 
-test('deletePatient removes record', () => {
-  const p = patients.addPatient({
-    firstName: 'A',
-    lastName: 'B',
-    dob: '2000-01-01'
-  });
+test('addPatient rejects a missing name', () => {
+  expect(() => patients.addPatient({ fullName: '   ' })).toThrow(/name is required/i);
+});
 
-  expect(patients.deletePatient(p.id)).toBe(true);
-  expect(patients.getPatients()).toHaveLength(0);
+test('addPatient defaults optional fields to empty strings', () => {
+  const patient = patients.addPatient({ fullName: 'Jane Doe' });
+  expect(patient).toMatchObject({ phone: '', email: '', dob: '', address: '', notes: '' });
+});
+
+test('deletePatient removes the correct patient', () => {
+  const a = patients.addPatient({ fullName: 'Keep' });
+  const b = patients.addPatient({ fullName: 'Remove me' });
+  expect(patients.deletePatient(b.id)).toBe(true);
+  const remaining = patients.getPatients();
+  expect(remaining).toHaveLength(1);
+  expect(remaining[0].id).toBe(a.id);
+});
+
+test('deletePatient returns false for an unknown id', () => {
+  expect(patients.deletePatient(9999)).toBe(false);
 });

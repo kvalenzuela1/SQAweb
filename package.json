@@ -5,8 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "dev": "node --watch server.js",
     "build": "node scripts/build.js",
-    "test": "jest"
+    "test": "jest",
+    "quality": "jest --runInBand --coverage --coverageThreshold='{\"global\":{\"branches\":75,\"functions\":80,\"lines\":90,\"statements\":85}}'"
   },
   "license": "MIT",
   "dependencies": {

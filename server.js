@@ -55,11 +55,6 @@ app.post('/api/invoices', (req, res) => {
   }
 });
 
-app.get('/invoice/:id', (req, res) => {
-  const invoice = invoices.getInvoice(Number(req.params.id));
-  if (!invoice) return res.status(404).send('Invoice not found');
-  res.send(renderInvoiceHtml(invoice));
-});
 app.get('/api/patients', (req, res) => {
   res.json(patients.getPatients());
 });
@@ -73,23 +68,17 @@ app.post('/api/patients', (req, res) => {
   }
 });
 
-app.get('/api/patients/:id', (req, res) => {
-  const patient = patients.findPatient(req.params.id);
-  if (!patient) return res.status(404).json({ error: 'Patient not found' });
-  res.json(patient);
-});
-
 app.delete('/api/patients/:id', (req, res) => {
-  const ok = patients.deletePatient(Number(req.params.id));
-  if (!ok) return res.status(404).json({ error: 'Patient not found' });
+  const deleted = patients.deletePatient(Number(req.params.id));
+  if (!deleted) return res.status(404).json({ error: 'Patient not found' });
   res.status(204).end();
 });
 
-app.post('/api/patients/reset', (req, res) => {
-  patients.reset();
-  res.status(204).end();
+app.get('/invoice/:id', (req, res) => {
+  const invoice = invoices.getInvoice(Number(req.params.id));
+  if (!invoice) return res.status(404).send('Invoice not found');
+  res.send(renderInvoiceHtml(invoice));
 });
-
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;

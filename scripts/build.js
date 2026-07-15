@@ -12,6 +12,7 @@ const files = [
   'lib/doctorCatalog.js',
   'lib/appointmentStore.js',
   'lib/invoiceStore.js',
+  'lib/patientStore.js',
   'lib/renderInvoice.js',
   'public/app.js',
 ];
