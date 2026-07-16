@@ -16,6 +16,7 @@ const serviceListEl = document.getElementById('service-list');
 const apptServicesEl = document.getElementById('appt-services');
 const apptServicesSummaryEl = apptServicesEl.querySelector('summary');
 const apptServicesOptionsEl = document.getElementById('appt-services-options');
+const apptPatientEl = document.getElementById('appt-patient');
 
 async function loadServices() {
   const res = await fetch('/api/services');
@@ -92,7 +93,6 @@ async function loadDoctors() {
 // --- appointments ---
 const apptListEl = document.getElementById('appointment-list');
 const apptFormEl = document.getElementById('appointment-form');
-const apptClientEl = document.getElementById('appt-client');
 const apptDateEl = document.getElementById('appt-date');
 const apptTimeEl = document.getElementById('appt-time');
 const apptErrorEl = document.getElementById('appointment-error');
@@ -157,7 +157,7 @@ apptFormEl.addEventListener('submit', async (e) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      clientName: apptClientEl.value,
+      patientId: Number(apptPatientEl.value),
       doctorId: apptDoctorEl.value,
       serviceIds: getSelectedServiceIds(),
       date: apptDateEl.value,
@@ -169,7 +169,7 @@ apptFormEl.addEventListener('submit', async (e) => {
     apptErrorEl.textContent = error;
     return;
   }
-  apptClientEl.value = '';
+  apptPatientEl.value = '';
   apptDateEl.value = '';
   apptTimeEl.value = '';
   apptServicesOptionsEl.querySelectorAll('input[name="appt-service"]:checked').forEach((el) => (el.checked = false));
@@ -246,6 +246,17 @@ async function loadPatients() {
 }
 
 function renderPatients(patients) {
+  apptPatientEl.innerHTML = '<option value="">Select patient</option>';
+  for (const patient of patients) {
+    const option = document.createElement('option');
+    option.value = patient.id;
+    option.textContent = patient.phone
+      ? patient.fullName + ' (' + patient.phone + ')'
+      : patient.fullName;
+    apptPatientEl.appendChild(option);
+  }
+  apptPatientEl.disabled = patients.length === 0;
+
   patientListEl.innerHTML = '';
   for (const patient of patients) {
     const li = document.createElement('li');
@@ -304,7 +315,7 @@ patientFormEl.addEventListener('submit', async (e) => {
     return;
   }
   patientFormEl.reset();
-  loadPatients();
+  await loadPatients();
 });
 
 // --- init ---

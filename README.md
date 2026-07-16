@@ -44,7 +44,7 @@ Actions or Jenkins.
 | Rubric pillar | What that means | Where it's satisfied |
 |---|---|---|
 | **Automation Tool Use** — "Explain and configure the selected tool for CI or quality automation." | krizziaci's trigger → execute → report design, documented below | [Architecture](#architecture), [`krizziaci/bin/krizziaci.js`](krizziaci/bin/krizziaci.js) |
-| **Quality Verification** — "Run automated checks that prove the application remains stable." | The `build` (syntax check), `test` (27 Jest tests), and `quality` (thresholded coverage) steps run automatically on every push and pull request | [`krizziaci.yml`](krizziaci.yml), [`scripts/build.js`](scripts/build.js), `test/*.test.js`, [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
+| **Quality Verification** — "Run automated checks that prove the application remains stable." | The `build` (syntax check), `test` (28 Jest tests), and `quality` (thresholded coverage) steps run automatically on every push and pull request | [`krizziaci.yml`](krizziaci.yml), [`scripts/build.js`](scripts/build.js), `test/*.test.js`, [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 | **Feature Integration** — "Add new features and show that the pipeline validates the change." | The appointment conflict-detection, patient-record, currency, and multi-service booking changes are covered by tests and recorded in the krizziaci build history | [Running the demo](#running-the-demo), [`.krizziaci/history.json`](.krizziaci/history.json) |
 
 ## Architecture
@@ -128,7 +128,7 @@ lib/invoiceStore.js       # turns a completed appointment into a numbered invoic
 lib/renderInvoice.js      # renders a printable, XSS-safe invoice HTML page
 public/                   # vanilla HTML/CSS/JS frontend (Appointments / Services / Invoices / Patients tabs)
 scripts/build.js          # "build" step: node --check syntax validation
-test/*.test.js            # Jest unit tests, one file per lib module (27 tests total)
+test/*.test.js            # Jest unit tests, one file per lib module (28 tests total)
 krizziaci.yml             # pipeline definition (install / build / test / quality)
 .github/workflows/        # push and pull-request workflow that runs krizziaci
 .krizziaci/               # committed: logs/ + history.json (build evidence)
@@ -138,7 +138,9 @@ krizziaci.yml             # pipeline definition (install / build / test / qualit
 
 Four tabs on one page (`http://localhost:3000` after `npm start`):
 
-- **Appointments** — book a client to a doctor and a service at a date/time.
+- **Appointments** — select a registered patient, then book them with a doctor
+  and one or more services at a date/time. The appointment stores the patient
+  ID and a name snapshot for invoice history.
   `lib/appointmentStore.js` rejects a booking that would overlap an existing
   appointment **for the same doctor, on the same date** (each service has a
   fixed duration, e.g. HydraFacial = 60 min); a different doctor, or the same
@@ -152,7 +154,8 @@ Four tabs on one page (`http://localhost:3000` after `npm start`):
   (`lib/renderInvoice.js`, with output HTML-escaped since client names are
   free-text user input). An appointment can only be invoiced once.
 - **Patients** — create and remove patient records with contact information,
-  date of birth, address, and medical notes/allergies.
+  date of birth, address, and medical notes/allergies. Registered patients are
+  selectable when creating appointments.
 
 ## Running the demo
 
@@ -172,7 +175,7 @@ Each feature commit has an associated pipeline run:
    back to `overlaps()`. → **PASSED**.
 4. **Current feature integration** — restricts the doctor roster, switches
    currency to PHP, adds patient records, and supports multi-service bookings.
-   The 27-test suite and coverage gate pass. → **PASSED**.
+   The 28-test suite and coverage gate pass. → **PASSED**.
 
 Run these to see it directly:
 
