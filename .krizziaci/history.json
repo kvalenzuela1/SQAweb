@@ -75,5 +75,71 @@
     "durationMs": 1423,
     "timestamp": "2026-07-02T07:04:42.128Z",
     "log": ".krizziaci/logs/run-7-50ca537-2026-07-02T07-04-42-128Z.log"
+  },
+  {
+    "run": 8,
+    "commit": "48ef0d4ffa17cbc5bcc6bc56fd64ad10a1a74f7e",
+    "commitShort": "48ef0d4",
+    "message": "Fix stale commit hashes in build history left over from the authorship rewrite",
+    "result": "PASSED",
+    "failedStep": null,
+    "durationMs": 1318,
+    "timestamp": "2026-07-02T07:08:47.218Z",
+    "log": ".krizziaci/logs/run-8-48ef0d4-2026-07-02T07-08-47-218Z.log"
+  },
+  {
+    "run": 9,
+    "commit": "257b1148d1d5125b8c2f25fd3b925865cb7a0639",
+    "commitShort": "257b114",
+    "message": "Restrict doctor roster to Rhodora Nieto, switch currency to PHP, add patient records, and support multi-service bookings",
+    "result": "PASSED",
+    "failedStep": null,
+    "durationMs": 1501,
+    "timestamp": "2026-07-03T02:19:28.657Z",
+    "log": ".krizziaci/logs/run-9-257b114-2026-07-03T02-19-28-657Z.log"
+  },
+  {
+    "run": 10,
+    "commit": "455833274b006d7e2adf8c296b4d7622a4d99549",
+    "commitShort": "4558332",
+    "message": "ci: add push checks and coverage quality gate",
+    "result": "PASSED",
+    "failedStep": null,
+    "durationMs": 2867,
+    "timestamp": "2026-07-14T08:07:07.751Z",
+    "log": ".krizziaci/logs/run-10-4558332-2026-07-14T08-07-07-751Z.log"
+  },
+  {
+    "run": 11,
+    "commit": "d54371fdc0c939d8733e546c6b6e118df5a88372",
+    "commitShort": "d54371f",
+    "message": "ci: update workflow actions to Node 24",
+    "result": "PASSED",
+    "failedStep": null,
+    "durationMs": 2624,
+    "timestamp": "2026-07-14T08:41:37.730Z",
+    "log": ".krizziaci/logs/run-11-d54371f-2026-07-14T08-41-37-730Z.log"
+  },
+  {
+    "run": 12,
+    "commit": "2101049df1169fb49e6cf7c5eb06e6c1de1d7ed4",
+    "commitShort": "2101049",
+    "message": "feat: link appointments to registered patients",
+    "result": "PASSED",
+    "failedStep": null,
+    "durationMs": 2894,
+    "timestamp": "2026-07-14T10:37:22.583Z",
+    "log": ".krizziaci/logs/run-12-2101049-2026-07-14T10-37-22-583Z.log"
+  },
+  {
+    "run": 13,
+    "commit": "a025cc5ec4a2068e908ac8ee9a571ff33f2f33fe",
+    "commitShort": "a025cc5",
+    "message": "Merge remote-tracking branch 'origin/main' into patient-records-feature",
+    "result": "PASSED",
+    "failedStep": null,
+    "durationMs": 3834,
+    "timestamp": "2026-07-15T05:12:13.882Z",
+    "log": ".krizziaci/logs/run-13-a025cc5-2026-07-15T05-12-13-882Z.log"
   }
 ]
